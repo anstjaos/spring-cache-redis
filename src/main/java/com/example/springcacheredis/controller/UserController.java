@@ -15,7 +15,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public User getUser(@PathVariable Long id) {
-        return userService.getUser(id);
+        return userService.getUser2(id);
     }
 
     @GetMapping("/redishash-users/{id}")
