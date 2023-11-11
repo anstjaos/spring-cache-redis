@@ -1,6 +1,8 @@
 package com.example.springcacheredis.domain.service;
 
+import com.example.springcacheredis.domain.entity.RedisHashUser;
 import com.example.springcacheredis.domain.entity.User;
+import com.example.springcacheredis.domain.repository.RedisHashUserRepository;
 import com.example.springcacheredis.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,6 +14,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RedisHashUserRepository redisHashUserRepository;
     private final RedisTemplate<String, User> userRedisTemplate;
     private final RedisTemplate<String, Object> objectRedisTemplate;
 
@@ -27,5 +30,18 @@ public class UserService {
         objectRedisTemplate.opsForValue().set(key, user, Duration.ofSeconds(30));
 
         return user;
+    }
+
+    public RedisHashUser getRedisHashUser(final Long id) {
+        return redisHashUserRepository.findById(id).orElseGet(() -> {
+            var user = userRepository.findById(id).orElseThrow();
+            return redisHashUserRepository.save(RedisHashUser.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
+                    .build());
+        });
     }
 }
